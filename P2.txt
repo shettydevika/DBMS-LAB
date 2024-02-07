@@ -1,0 +1,91 @@
+DATE : 07-02-24
+Prog 2:
+
+QUERY 1:
+
+SQL>  SELECT B.BOOK_ID,TITLE,PUBLISHER_NAME,AUTHOR_NAME,NO_OF_COPIES
+  2  FROM BOOK B, BOOK_AUTHOR A, BOOK_COPIES BC
+  3  WHERE B.BOOK_ID=BC.BOOK_ID AND
+  4  B.BOOK_ID=A.BOOK_ID ;
+
+BOOK_ID              TITLE                                    PUBLISHER_NAME       AUTHOR_NAME          NO_OF_COPIES
+-------------------- ---------------------------------------- -------------------- -----------------
+B101                 DBMS                                     Pearson              Elmarsi                        99
+B102                 AIML                                     TataMcGraw           Navathe                        99
+B103                 DCN                                      Pearson              Ramakrishna                    99
+B103                 DCN                                      Pearson              Ramakrishna                    99
+
+
+QUERY 2:
+
+SQL> SELECT CARD_NO 
+  2  FROM  BOOK_LENDING WHERE 
+  3  DATE_OUT BETWEEN '01-JAN-2023' AND '30-JUN-2023'
+  4  GROUP BY CARD_NO 
+  5  HAVING COUNT(*) >=3;
+
+CARD_NO
+--------------------
+FA102
+
+
+QUERY 3:
+
+SQL> DELETE FROM BOOK WHERE BOOK_ID=&BID;
+Enter value for bid: 'B103'
+old   1: DELETE FROM BOOK WHERE BOOK_ID=&BID
+new   1: DELETE FROM BOOK WHERE BOOK_ID='B103'
+
+1 row deleted.
+
+
+QUERY 4:
+
+
+SQL> CREATE TABLE BOOK1(
+  2  BOOK_ID VARCHAR2(20) PRIMARY KEY,
+  3  TITLE VARCHAR2(40),
+  4  PUBLISHER_NAME VARCHAR2(20) references
+  5  PUBLISHER(NAME) ON DELETE CASCADE,
+  6  PUB_YEAR INT)
+  7  PARTITION BY RANGE (PUB_YEAR)
+  8  (PARTITION p1 VALUES LESS THAN (2001),
+  9  PARTITION p2 VALUES LESS THAN (2005),
+ 10  PARTITION p3 VALUES LESS THAN (2010),
+ 11  PARTITION p4 VALUES LESS THAN (MAXVALUE));
+
+Table created.
+
+
+INSERT INTO BOOK1 VALUES ('B101', 'DBMS', 'Pearson', 2017);
+INSERT INTO BOOK1 VALUES ('B102', 'AIML', 'TataMcGraw',2009);
+INSERT INTO BOOK1 VALUES ('B103', 'DCN', 'Pearson', 2017);
+INSERT INTO BOOK1 VALUES ('B104', 'ATC', 'Oxford', 2017);
+INSERT INTO BOOK1 VALUES ('B105', 'Python', 'OReilly', 2014);
+INSERT INTO BOOK1 VALUES ('B106', 'Hadoop', 'Pearson', 2000);
+
+SQL> SELECT * FROM BOOK1 PARTITION(p1);
+
+BOOK_ID              TITLE                                    PUBLISHER_NAME         PUB_YEAR
+-------------------- ---------------------------------------- -------------------- ----------
+B106                 Hadoop                                   Pearson                    2000
+
+SQL> SELECT * FROM BOOK1 PARTITION(p2);
+
+no rows selected
+
+SQL> SELECT * FROM BOOK1 PARTITION(p3);
+
+BOOK_ID              TITLE                                    PUBLISHER_NAME         PUB_YEAR
+-------------------- ---------------------------------------- -------------------- ----------
+B102                 AIML                                     TataMcGraw                 2009
+
+SQL> SELECT * FROM BOOK1 PARTITION(p4);
+
+BOOK_ID              TITLE                                    PUBLISHER_NAME         PUB_YEAR
+-------------------- ---------------------------------------- -------------------- ----------
+B101                 DBMS                                     Pearson                    2017
+B103                 DCN                                      Pearson                    2017
+B104                 ATC                                      Oxford                     2017
+B105                 Python                                   OReilly                    2014
+

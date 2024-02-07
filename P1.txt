@@ -1,0 +1,143 @@
+DATE: 31-01-24
+CREATE TABLE PUBLISHER(name VARCHAR(20) PRIMARY KEY,address VARCHAR(20),phone NUMBER(10));
+
+INSERT INTO PUBLISHER VALUES('Pearson','London',9874522224);
+INSERT INTO PUBLISHER VALUES('TataMcGraw','NewYork',9858523565);
+INSERT INTO PUBLISHER VALUES('Oxford','UK',9885121112);
+INSERT INTO PUBLISHER VALUES('OReilly','Califonia',9994125455);
+
+SELECT * FROM PUBLISHER;
+
+NAME                 ADDRESS                   PHONE
+-------------------- -------------------- ----------
+Pearson              London               9874522224
+TataMcGraw           NewYork              9858523565
+Oxford               UK                   9885121112
+OReilly              Califonia            9994125455
+Cambridge            UK                   9785634615
+
+CREATE TABLE BOOK (
+BOOK_ID VARCHAR2(20) PRIMARY KEY,
+TITLE VARCHAR2(40),
+PUBLISHER_NAME VARCHAR2(20) references
+PUBLISHER(NAME) ON DELETE CASCADE,
+PUB_YEAR INT);
+
+INSERT INTO BOOK VALUES ('B101', 'DBMS', 'Pearson', 2017);
+INSERT INTO BOOK VALUES ('B102', 'AIML', 'TataMcGraw',1009);
+INSERT INTO BOOK VALUES ('B103', 'DCN', 'Pearson', 2017);
+INSERT INTO BOOK VALUES ('B104', 'ATC', 'Oxford', 2017);
+INSERT INTO BOOK VALUES ('B105', 'Python', 'OReilly', 2014);
+INSERT INTO BOOK VALUES ('B106', 'Hadoop', 'Pearson', 2000);
+
+SET LINESIZE 200;
+SELECT * FROM BOOK;
+
+BOOK_ID              TITLE                                    PUBLISHER_NAME         PUB_YEAR
+-------------------- ---------------------------------------- -------------------- ----------
+B101                 DBMS                                     Pearson                    2017
+B102                 AIML                                     TataMcGraw                 1009
+B103                 DCN                                      Pearson                    2017
+B104                 ATC                                      Oxford                     2017
+B105                 Python                                   OReilly                    2014
+B106                 Hadoop                                   Pearson                    2000
+
+
+CREATE TABLE BOOK_AUTHOR (
+BOOK_ID VARCHAR2(20),
+AUTHOR_NAME VARCHAR2(20),
+PRIMARY KEY(BOOK_ID, AUTHOR_NAME),
+FOREIGN KEY(BOOK_ID) REFERENCES BOOK ON DELETE CASCADE);
+
+INSERT INTO BOOK_AUTHOR VALUES ('B101', 'Elmarsi');
+INSERT INTO BOOK_AUTHOR VALUES ('B102', 'Navathe');
+INSERT INTO BOOK_AUTHOR VALUES ('B103', 'Ramakrishna');
+INSERT INTO BOOK_AUTHOR VALUES ('B104', 'Douglas');
+INSERT INTO BOOK_AUTHOR VALUES ('B105', 'Elaine');
+INSERT INTO BOOK_AUTHOR VALUES ('B106', 'Sriniasan');
+
+SQL> SELECT * FROM BOOK_AUTHOR;
+
+BOOK_ID              AUTHOR_NAME
+-------------------- --------------------
+B101                 Elmarsi
+B102                 Navathe
+B103                 Ramakrishna
+B104                 Douglas
+B105                 Elaine
+B106                 Sriniasan
+
+CREATE TABLE LIBRARY_PROGRAMME(
+PROGRAMME_ID VARCHAR2(20) PRIMARY KEY,
+PROGRAMME_NAME VARCHAR(10),
+ADDRESS VARCHAR(20));
+
+INSERT INTO LIBRARY_PROGRAMME VALUES ('L1', 'SAHAYADRI', 'MANGALORE');
+INSERT INTO LIBRARY_PROGRAMME VALUES ('L2', 'SAPNA', 'MANGALORE');
+INSERT INTO LIBRARY_PROGRAMME VALUES ('L3', 'SANKALP', 'BANGALORE');
+INSERT INTO LIBRARY_PROGRAMME VALUES ('L4', 'PENGUIN', 'CHENNAI');
+INSERT INTO LIBRARY_PROGRAMME VALUES ('L5', 'AGNES', 'CHENNAI');
+
+SQL> SELECT * FROM LIBRARY_PROGRAMME;
+
+PROGRAMME_ID         PROGRAMME_ ADDRESS
+-------------------- ---------- --------------------
+L1                   SAHAYADRI  MANGALORE
+L2                   SAPNA      MANGALORE
+L3                   SANKALP    BANGALORE
+L4                   PENGUIN    CHENNAI
+L5                   AGNES      CHENNAI
+
+CREATE TABLE BOOK_COPIES(
+BOOK_ID VARCHAR(20)
+REFERENCES BOOK(BOOK_ID)
+ON DELETE CASCADE,
+PROGRAMME_ID VARCHAR2(20)
+REFERENCES LIBRARY_PROGRAMME(PROGRAMME_ID)
+ON DELETE CASCADE,
+NO_OF_COPIES NUMBER(2),
+PRIMARY KEY(BOOK_ID, PROGRAMME_ID));
+
+INSERT INTO BOOK_COPIES VALUES ('B101', 'L1', 99);
+INSERT INTO BOOK_COPIES VALUES ('B102', 'L1', 99);
+INSERT INTO BOOK_COPIES VALUES ('B103', 'L2', 99);
+INSERT INTO BOOK_COPIES VALUES ('B103', 'L1', 99);
+
+SQL> SELECT * FROM BOOK_COPIES;
+
+BOOK_ID              PROGRAMME_ID         NO_OF_COPIES
+-------------------- -------------------- ------------
+B101                 L1                             99
+B102                 L1                             99
+B103                 L2                             99
+B103                 L1                             99
+
+ CREATE TABLE BOOK_LENDING(
+ BOOK_ID VARCHAR2(20),
+ PROGRAMME_ID VARCHAR(20),
+ CARD_NO VARCHAR(20),
+ DATE_OUT DATE,
+ DUE_DATE DATE,
+ PRIMARY KEY(PROGRAMME_ID, BOOK_ID, CARD_NO),
+ FOREIGN KEY(BOOK_ID)
+ REFERENCES BOOK(BOOK_ID) ON DELETE CASCADE,
+ FOREIGN KEY(PROGRAMME_ID)
+ REFERENCES LIBRARY_PROGRAMME(PROGRAMME_ID) ON DELETE CASCADE,
+ CONSTRAINT CK1 CHECK (DUE_DATE > DATE_OUT));
+
+INSERT INTO BOOK_LENDING VALUES ('B101', 'L1', 'FA101', '02-JAN-21', '09-JAN-21');
+INSERT INTO BOOK_LENDING VALUES ('B101', 'L1', 'FA102', '02-MAR-23', '09-MAR-23');
+INSERT INTO BOOK_LENDING VALUES ('B102', 'L1', 'FA102', '02-MAR-23', '09-MAR-23');
+INSERT INTO BOOK_LENDING VALUES ('B101', 'L2', 'FA102', '02-MAR-23', '09-MAR-23');
+INSERT INTO BOOK_LENDING VALUES ('B101', 'L1', 'S103', '04-APR-22', '30-JUN-22');
+
+SQL> SELECT * FROM  BOOK_LENDING;
+
+BOOK_ID              PROGRAMME_ID         CARD_NO              DATE_OUT  DUE_DATE
+-------------------- -------------------- -------------------- --------- ---------
+B101                 L1                   FA101                02-JAN-21 09-JAN-21
+B101                 L1                   FA102                02-JAN-21 09-MAR-23
+B102                 L1                   FA102                02-JAN-21 09-MAR-23
+B101                 L2                   FA102                02-JAN-21 09-MAR-23
+B101                 L1                   S103                 02-JAN-21 30-JUN-22
+
