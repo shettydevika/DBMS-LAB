@@ -41,7 +41,6 @@ new   1: DELETE FROM BOOK WHERE BOOK_ID='B103'
 
 QUERY 4:
 
-
 SQL> CREATE TABLE BOOK1(
   2  BOOK_ID VARCHAR2(20) PRIMARY KEY,
   3  TITLE VARCHAR2(40),
@@ -89,3 +88,19 @@ B103                 DCN                                      Pearson           
 B104                 ATC                                      Oxford                     2017
 B105                 Python                                   OReilly                    2014
 
+QUERY 5:
+SQL> CREATE VIEW AVAILABLE_BOOK
+  2  AS
+  3  SELECT B.BOOK_ID, B.TITLE,
+  4  SUM(BC.NO_OF_COPIES)-(SELECT COUNT(*) FROM BOOK_LENDING B1 WHERE B1.BOOK_ID=B.BOOK_ID 
+  5  GROUP BY B1.BOOK_ID) AS BOOKS_AVAILABLE FROM BOOK B , BOOK_COPIES BC 
+  6  WHERE B.BOOK_ID=BC.BOOK_ID GROUP BY B.BOOK_ID, B.TITLE;
+
+View created.
+
+SQL> SELECT * FROM AVAILABLE_BOOK;
+
+BOOK_ID              TITLE                                    BOOKS_AVAILABLE
+-------------------- ---------------------------------------- ---------------
+B101                 DBMS                                                  95
+B102                 AIML                                                  98
