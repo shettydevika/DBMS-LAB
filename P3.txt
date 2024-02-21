@@ -14,12 +14,12 @@ SQL> CREATE TABLE EMPLOYEE(
   8  DNO NUMBER);
 
 Table created.
-
 INSERT INTO EMPLOYEE VALUES( 1, 'RAHUL', ' MANGALURU' , 'M', 35000,1,NULL);
 INSERT INTO EMPLOYEE VALUES( 2, 'SAHANA', ' MANGALURU' , 'F', 35000,1,NULL);
 INSERT INTO EMPLOYEE VALUES( 3, 'SAGAR', ' BENGALURU' , 'M', 35000,1,NULL);
 INSERT INTO EMPLOYEE VALUES( 4, 'SAGARIK', ' MANGALURU' , 'M', 35000,1,NULL);
 INSERT INTO EMPLOYEE VALUES( 5, 'SAJAAN', ' MYSORE' , 'M', 600000,1,NULL);
+
 
 SQL> SELECT *FROM EMPLOYEE;
 
@@ -50,6 +50,7 @@ INSERT INTO DEPARTMENT VALUES(2,'IOT',2,'2-NOV-2007');
 INSERT INTO DEPARTMENT VALUES(3,'Account',2,'2-NOV-2017');
 INSERT INTO DEPARTMENT VALUES(4,'ISE',1,'2-NOV-2000');
 INSERT INTO DEPARTMENT VALUES(5,'Finance',1,'3-NOV-2001');
+
 
 SQL> SELECT * FROM DEPARTMENT;
 
@@ -122,6 +123,7 @@ INSERT INTO DLOCATION VALUES(3,'BENGALURU');
 INSERT INTO DLOCATION VALUES(4,'MANGALURU');
 INSERT INTO DLOCATION VALUES(5,'MANGALURU');
 
+
 SQL> SELECT * FROM DLOCATION;
 
        DNO LOCATION
@@ -152,6 +154,7 @@ INSERT INTO PROJECT VALUES(3,'CC','HUBLI',3);
 INSERT INTO PROJECT VALUES(4,'Image Processing','MANGALURU',4);
 INSERT INTO PROJECT VALUES(5,'Research','MANGALURU',5);
 
+
 SQL> SELECT * FROM PROJECT;
 
       PNUM PNAME                PLOCATION         DNO
@@ -177,6 +180,8 @@ INSERT INTO WORKS_ON VALUES(3,2,4);
 INSERT INTO WORKS_ON VALUES(4,3,4);
 INSERT INTO WORKS_ON VALUES(5,5,4);
 
+
+
 SQL> SELECT * FROM WORKS_ON;
 
        EID        PNO      HOURS
@@ -186,7 +191,9 @@ SQL> SELECT * FROM WORKS_ON;
          3          2          4
          4          3          4
          5          5          4
------------------------------------------------------------------------------
+
+---------------------------------------------------
+
 CREATE TABLE DEPENDENT(
 EMP_ID INT CONSTRAINT DEP_EMPID_PK PRIMARY KEY,
 DEPENDENT_NAME VARCHAR2(12),
@@ -212,3 +219,84 @@ SQL> SELECT * FROM DEPENDENT;
          3 PRIYA        F     10-SEP-80 SISTER
          4 NIKHIL       M     02-FEB-79 FATHER
          5 AKSHA        F     30-OCT-75 MOTHER
+
+-------------------------------------------------------------------------
+21-02-24
+
+QUERY 1:
+
+SQL> SELECT PNO
+  2  FROM WORKS_ON 
+  3  WHERE EID IN
+  4  ( SELECT EID FROM EMPLOYEE WHERE NAME='RAHUL')
+  5  UNION
+  6  SELECT PNUM 
+  7  FROM PROJECT 
+  8  WHERE DNO IN
+  9  (SELECT DNUM FROM DEPARTMENT WHERE DMGR_ID IN 
+ 10  (SELECT EID FROM EMPLOYEE WHERE NAME='RAHUL'));
+
+OUTPUT:
+       PNO
+----------
+         1
+         2
+         4
+-----------------------------------------------------
+QUERY 2:
+SQL> SELECT EID, NAME, SALARY,SALARY+0.1*SALARY AS UPDATED_SALARY
+  2  FROM EMPLOYEE
+  3  WHERE EID IN
+  4  (SELECT EID FROM WORKS_ON WHERE PNO IN(
+  5  SELECT PNUM FROM PROJECT WHERE PNAME='IOT'));
+
+OUTPUT:
+
+       EID NAME                     SALARY UPDATED_SALARY
+---------- -------------------- ---------- --------------
+         1 RAHUL                     35000          38500
+         2 SAHANA                    35000          38500
+---------------------------------------------------------------
+QUERY 3:
+
+SQL> SELECT SUM(SALARY),AVG(SALARY),MAX(SALARY),MIN(SALARY)
+  2  FROM EMPLOYEE E, DEPARTMENT D
+  3  WHERE D.DNUM=E.DNO AND DNAME='Account';
+
+OUTPUT
+
+SUM(SALARY) AVG(SALARY) MAX(SALARY) MIN(SALARY)
+----------- ----------- ----------- -----------
+     670000  223333.333      600000       35000 
+---------------------------------------------------------------
+QUERY 4:
+SQL> SELECT EID ,NAME
+  2  FROM EMPLOYEE E
+  3  WHERE NOT EXISTS(
+  4  (SELECT PNUM FROM PROJECT WHERE DNO=5) MINUS
+  5  (SELECT PNO FROM WORKS_ON W WHERE W.EID=E.EID)
+  6  );
+
+OUTPUT:
+
+       EID NAME
+---------- --------------------
+         5 SAJAAN       
+-------------------------------------------------------
+QUERY 5:
+SQL> CREATE VIEW DEPINFO(NAME,COUNT_EMP,SUM_SAL) AS
+  2  SELECT D.DNAME, COUNT(*),SUM(SALARY)
+  3  FROM DEPARTMENT D INNER JOIN EMPLOYEE E
+  4  ON E.DNO=D.DNUM
+  5  GROUP BY D.DNAME;
+
+View created.
+
+SQL> SELECT * FROM DEPINFO;
+
+NAME        COUNT_EMP    SUM_SAL
+---------- ---------- ----------
+ISE                 1      35000
+Account             3     670000
+CSE                 1      35000
+-------------------------------------------------------
