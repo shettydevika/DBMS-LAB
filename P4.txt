@@ -1,3 +1,7 @@
+DATE: 21-02-24
+
+COLLEGE DATABASE:
+
 CREATE TABLE STUDENT (
 USN VARCHAR2(20), 
 SNAME VARCHAR2(10),
@@ -13,7 +17,6 @@ INSERT INTO STUDENT VALUES('4SF20CD001','SAHANA','SURATKA',9876544567,'FEMALE');
 INSERT INTO STUDENT VALUES('4SF20CS088','KAVYA','MANGALORE',876514067,'FEMALE');
 
 SELECT * FROM STUDENT;
-
 
 USN                  SNAME      ADDRESS         PHONE GENDER
 -------------------- ---------- ---------- ---------- ----------
@@ -61,7 +64,6 @@ INSERT INTO CLASS VALUES(2,'4SF20CS088');
 INSERT INTO CLASS VALUES(3,'4SF20CS089');
 INSERT INTO CLASS VALUES(4,'4SF20IS109');
 INSERT INTO CLASS VALUES(5,'4SF20CS098');
-
 
 SELECT * FROM CLASS;
 
@@ -127,3 +129,27 @@ USN                  SUBCODE       SSID      TESTI      TEST2      TEST3    FINA
 4SF20IS109           20CS35           5         28         26         29          0
 
 --------------------------------------------------------------------------------------------------------
+QUERY 1:
+SQL> SELECT A.*,B.SEM,B.SECTION FROM STUDENT A,SEMSEC B, CLASS C 
+  2  WHERE A.USN=C.USN AND B.SSID=C.SSID
+  3  AND B.SEM=4 AND B.SECTION='C';
+
+USN                  SNAME      ADDRESS         PHONE GENDER            SEM S
+-------------------- ---------- ---------- ---------- ---------- ---------- -
+4SF20CS088           KAVYA      MANGALORE   876514067 FEMALE              4 C
+----------------------------------------------------------------------------------------
+QUERY 2:
+
+SQL> SELECT SEM,SECTION,GENDER,COUNT(*) 
+  2  FROM STUDENT S, SEMSEC S1,CLASS C
+  3  WHERE S.USN=C.USN AND S1.SSID=C.SSID 
+  4  GROUP BY (GENDER,SEM,SECTION) ORDER BY (SEM);
+
+       SEM S GENDER       COUNT(*)
+---------- - ---------- ----------
+         4 A FEMALE              1
+         4 C FEMALE              1
+         8 B FEMALE              1
+         8 A MALE                1
+         8 C MALE                1
+--------------------------------------------------------------------------------------------
